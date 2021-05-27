@@ -1,0 +1,214 @@
+body{
+  display:block;
+  margin: 0px;
+  padding: 0px;
+  width: 100%;
+  height: 100%;
+  font-size: 16px;
+  background: #fff;
+}
+*{
+  box-sizing: border-box;
+}
+div{
+  display:block;
+}
+#logo_area{
+  position: relative;
+  height:100%;
+}
+#main_header{
+    background:black;
+    height:100px;
+    position: relative;
+    width:1903px;
+    display:block;
+}
+
+#main_header>#title{
+   display:block;
+    position:absolute;
+    left:873px;
+    top:25px;
+    overflow:hidden;
+    white-space:nowrap;
+    font-size:30px;
+}
+#main_header>#main_gnb{
+  position: absolute;
+  top:12px;
+  right:27px;
+}
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+#result{
+  padding:0 30px;
+    margin:0 auto;
+    height:50px;
+    position: relative;
+    width:1536px;
+    display:block;
+  
+}
+input[type=date], input[type=time] {
+  width: 100%;
+  padding: 3px 8px;
+  margin: 5px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+textarea{
+  width: 99%;
+  box-sizing: border-box;
+}
+#search-list{
+  position: absolute;
+  background: white;
+  width:200px;
+  margin:0;
+  z-index: 100;
+  padding:0px;
+  cursor: pointer;
+}
+#searchpre{
+  width:176;
+  padding:1px 2px;
+  border: 1px solid black;
+}
+#searchpre:hover{
+  background: gray;
+}
+ul{
+  
+    display: block;
+    list-style-type: disc;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    padding-inline-start: 40px;
+
+}
+#main_gnb>ul{overflow:hidden;}
+#main_gnb>ul>li{float:left;}
+#main_gnb>ul>li>a{
+    display:block;
+    padding:5px 10px;
+    border: 1px solid black;
+}
+#main_gnb>ul>li>a:hover{
+    background:black;
+    color:white;
+}
+#main_gnb>ul>li:first-child>a{border-radius: 10px 0 0 10px;}
+#main_gnb>ul>li:last-child>a{border-radius:0 10px 10px 0;}
+ul{
+    list-style:none;
+    }
+#map{
+    width:1903px;
+    height: 100vh;
+
+}
+
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: white;
+    overflow-x: hidden;
+    transition: 0.5s;
+  }
+  
+  .sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+  }
+  
+  .sidenav a:hover {
+    color: #f1f1f1;
+  }
+  
+  .sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    font-size: 36px;
+    margin-left: 50px;
+  }
+  #topbar{
+    background-color: black;
+    height:60px;
+  }
+  #diary{
+    text-align: left;
+    width:99%;
+    height:15%;
+    cursor: pointer;
+    display:block;
+    white-space:nowrap;
+    overflow: hidden;
+    border: 1px solid black;
+    border-radius: 5px;
+  }
+  #diary:hover{
+    background: gray;
+  }
+  #search-form{
+    height:52px;
+    width:582px;
+    font-size: 12px;
+    border-radius: 2px;
+    display:block;
+    white-space:nowrap;
+    overflow: hidden;
+  }
+  #nodata{
+    display:block;
+    text-align: center;
+    overflow: hidden;
+    white-space:nowrap;
+  }
+  #i_text{
+    margin-left: 1px;
+  }
+  .deletebtn {
+    padding: 14px 20px;
+    background-color: #f44336;
+  }
+  .deletebtn, .updatebtn {
+    float: left;
+    width: 50%;
+  }
+  button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  #search1{
+    
+    left:880px;
+    top:30px;
+    position: absolute;
+    display:block;
+  }
+  @media screen and (max-height: 450px) {
+    .sidenav {padding-top: 15px;}
+    .sidenav a {font-size: 18px;}
+  }

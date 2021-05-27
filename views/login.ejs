@@ -1,0 +1,31 @@
+
+<!DOCTYPE html>
+<html>
+<link rel="stylesheet" href="../css/login.css">
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+</head>
+<body>
+    <form action="/login" method="post">
+        <div class="imgcontainer">
+          <img src="../images/kyunghee.png" alt="Avatar" class="avatar">
+        </div>
+      
+        <div class="container">
+          <label for="uname"><b>아이디</b></label>
+          <input type="text" placeholder="Enter Username" name="uname" required>
+      
+          <label for="psw"><b>비밀번호</b></label>
+          <input type="password" placeholder="Enter Password" name="psw" required>
+      
+          <button type="submit">로그인</button>
+        </div>
+      
+        <div class="container" style="background-color:#f1f1f1">
+          <button type="button" class="cancelbtn" onclick="location.href='/'">취소</button>
+        </div>
+      </form>
+</body>
+</html>
+

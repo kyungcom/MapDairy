@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+  <link rel="stylesheet" href="../css/layout.css">
+  <script type="text/javascript" src="../js/layout.js"></script>
+  <script type="text/javascript" src="../js/diary.js"></script>
+ 
+<head>
+  <meta charset="UTF-8">
+  <title><%=title%></title>
+</head>
+
+<body>
+  <div id="main_header">
+    <div id="logo_area">
+      <div style="margin-top: 25px;margin-left:12px; color: white; display:inline-block;font-size:30px;cursor:pointer;top:10px;left:4px;" onclick="openNav()">&#9776; open</div>
+      <div id="mySidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div id="topbar"></div>
+        <form id="diary-search">
+          <input type="date" id="diary-sdate" name="diary-sdate">
+        </form>
+        <div id="sub-bar" style="text-align: center;overflow: hidden;white-space:nowrap;">
+          날짜를 지정해주세요.
+        </div>
+      </div>
+      <div  id="search1">
+    
+        <form method="get" id="search-form" >
+          <input type="text" name="search" id="search" style="height:35px;width:200px" autocomplete="off" placeholder="장소를 입력해주세요.">
+          <input type="submit" value="검색" id="search-btn.btn" style="width:40px; height:35px; ">
+          <input type="button" value="주변검색" id="loc-search-btn" style="width:80px; height:35px; ">
+          <ul id="search-list"></ul>
+        </form> 
+      </div>
+    </div>
+    
+
+    <div id="title" style="left: 723px;">
+      <div style="color:white;">Map Dairy</div>
+    </div>
+    <div id="main_gnb">
+      <div style="color:white;"><%=name%>님 안녕하세요.</div>
+      <button type="button" class="logout" onclick="location.href='/logout'">로그아웃</button>
+    </div>
+  </div>
+  <script>
+    var flightcordinates=[];
+    var map;
+    var markers=[];
+    var timer;
+    var diarylist=[];
+    document.querySelector('#search').addEventListener('keyup',function(e){
+      var xhr=new XMLHttpRequest();
+      xhr.onreadystatechange=function(){
+        if(xhr.readyState===xhr.DONE){
+          if(xhr.status===200){
+            var predictions=JSON.parse(xhr.responseText);
+            var ul=document.querySelector('#search-list');
+            ul.innerHTML='';
+            predictions.forEach(function(pred){
+              var li=document.createElement('li');
+              li.setAttribute("id","searchpre");
+              li.textContent=pred.terms[0].value;
+              li.onclick=function(){
+                location.href='/search/'+pred.terms[0].value;
+              }
+              ul.appendChild(li);
+            });
+            
+          }else{
+            console.error(xhr.responseText);
+          }
+        }
+      };
+      var query=this.value.trim();
+      if(timer){
+        clearTimeout(timer);
+      }
+      timer=setTimeout(function(){
+        if(query){
+          xhr.open('GET','/autocomplete/'+query);
+          xhr.send();
+        }
+      },200);
+    });
+    var timer2;
+    document.querySelector('#diary-sdate').addEventListener('change',function(e){
+      deleteMarkers();
+      positions=[];
+      flightcordinates=[];
+      var xhr2=new XMLHttpRequest();
+      xhr2.onreadystatechange=function(){
+        if(xhr2.readyState===xhr2.DONE){
+          if(xhr2.status===200){
+            var diarylist=JSON.parse(xhr2.responseText);
+            var ul=document.querySelector('#sub-bar');
+            ul.innerHTML='';
+            if(diarylist!=undefined){
+              diarylist.forEach(function(pred){
+              positions.push(pred);
+              var divs=document.createElement('div');
+              divs.setAttribute("id","diary");
+              divs.setAttribute("name","diary");
+              divs.innerHTML=pred.date+'<br/>'+pred.time+'<br/>' +pred.name;
+              divs.addEventListener('click',function(){
+                markers.forEach(function(mark){
+                  if(mark.time==pred.time&&mark.title==pred.name){
+                    google.maps.event.trigger(mark,'click');
+                  }
+                })
+              })
+              ul.appendChild(divs);
+            });
+            initMap();
+          }
+          }else{
+            console.error(xhr2.responseText);
+          }
+        }
+      };
+      var query=this.value.trim();
+      if(timer2){
+        clearTimeout(timer2);
+      }
+      timer2=setTimeout(function(){
+        if(query){
+          xhr2.open('GET','/diary/'+query);
+          xhr2.send();
+        }
+      },200);
+    });
+    document.querySelector('#search-form').addEventListener('submit',function(e){
+      e.preventDefault();
+      if(!this.search.value||!this.search.value.trim()){
+        this.search.focus();
+        return false;
+      }
+      this.action='/search/'+this.search.value.trim();
+      return this.submit();
+    });
+    document.querySelector('#loc-search-btn').addEventListener('click',function(e){
+      e.preventDefault();
+      if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(function(pos){
+          var search=document.querySelector('#search');
+          if(!search.value||!search.value.trim()){
+            search.focus();
+            return false;
+          }  
+          var lat=pos.coords.latitude;
+          var lng=pos.coords.longitude;
+          location.href='/search/'+search.value.trim()+'?lat='+lat+'&lng='+lng;
+        },function(){
+          alert('내 위치 확인 권한을 허용하세요.');
+        },{
+          enableHighAccuracy:false,
+          maximumAge:0,
+          timeout:Infinity
+        });
+      }
+      else{
+        alert('GPS를 지원하지 않습니다.');
+      }
+    });
+  </script>
+ <script>
+  var positions=[];
+</script>
+<% if(query.trim()) {%>
+<% for (var i=0; i<results.length; i++){ %>
+  <script>
+    positions.push({
+      lat:<%-JSON.stringify(results[i].geometry.location.lat)%>,
+      lng:<%-JSON.stringify(results[i].geometry.location.lng)%>,
+      name:'<%-results[i].name%>',
+      id: '<%-results[i].place_id%>',
+    });
+   </script>
+  <% } %>
+  <% } %>
+
+  <div id="map"></div>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=여기에 넣어주세요&callback=initMap&region=kr"></script>
+  <script>
+    function initMap() {
+      var diaryli=1;
+      if(positions[0]===undefined){
+        var first ={ lat: 37.239961471642516,lng: 127.08331885578615 };
+      }else{
+        if(positions[0].userid===undefined){
+          diaryli=0;
+        }
+        var first={lat:Number(positions[0].lat),lng:Number(positions[0].lng)};
+      }
+      map = new google.maps.Map(
+        document.getElementById('map'), {
+          zoom: 15,
+          center: first
+        });
+        if(diaryli===0){
+          positions.forEach(function(pos){
+            addMarker(pos);
+          });
+        }else{
+          for(var i=0;i<positions.length;i++){
+            addMarkerinfo(positions[i],Number(i+1));
+          }
+          const flightPath = new google.maps.Polyline({
+            path: flightcordinates,
+            geodesic: true,
+            strokeColor: "#FF0000",
+            strokeOpacity: 1.0,
+            strokeWeight: 2,
+          });
+          flightPath.setMap(map);
+        }
+  
+  
+    }
+    function addMarker(location) {
+      const marker = new google.maps.Marker({
+      position: {lat:Number(location.lat),lng:Number(location.lng)},
+       map: map,
+       title:location.name,
+       time:location.time
+       });
+      var now=new Date();
+      var year=now.toISOString().slice(0,10);
+      var div=document.createElement('div');
+      var h1=document.createElement('h1');
+      var button=document.createElement('button');
+      var labeldate=document.createElement('label');
+      var labeltime=document.createElement('label');
+      var labeltext=document.createElement('label');
+      
+      var date=document.createElement('input');
+      var time=document.createElement('input');
+      var text=document.createElement('textarea');
+      var form=document.createElement('form');
+      labeldate.htmlFor="i_date";
+      labeltext.htmlFor="i_text";
+      labeltime.htmlFor="i_time";
+      text.setAttribute("name","text");
+      form.setAttribute("method","POST");
+      form.setAttribute("name","frm");
+      form.setAttribute("action","/check_in/"+location.name+","+location.lat+","+location.lng);
+      time.setAttribute("name","time");
+      time.setAttribute("id","i_time");
+      time.setAttribute("type","time");
+      date.setAttribute("type","date");
+      date.setAttribute("name","date");
+      date.setAttribute("id","i_date");
+      date.setAttribute("value",year);
+      text.setAttribute("id","i_text");
+      text.setAttribute("maxlength","2000");
+      text.setAttribute("rows","15");
+      text.setAttribute("placeholder","내용을 입력해 주세요. 최대 2000글자 입니다.");
+      button.setAttribute("onclick","return check();")
+      h1.textContent=location.name;
+      button.classList.add('btn');
+      labeldate.textContent='날짜';
+      labeltime.textContent='시간';
+      labeltext.textContent='내용';
+      button.textContent='등록';
+      div.appendChild(h1);
+      div.appendChild(form);
+      form.appendChild(labeldate);
+      form.appendChild(date);
+      form.appendChild(labeltime);
+      form.appendChild(time);
+      form.appendChild(labeltext);
+      form.appendChild(text);
+      form.appendChild(button);
+      var infoWin=new google.maps.InfoWindow({
+        content:div
+      })
+      marker.addListener('click',function(){
+        infoWin.open(map,marker);
+      });
+     markers.push(marker);
+    }
+
+    function addMarkerinfo(location,number) {
+      flightcordinates.push({lat:Number(location.lat),lng:Number(location.lng)});
+      const marker = new google.maps.Marker({
+      position: {lat:Number(location.lat),lng:Number(location.lng)},
+       map: map,
+       title:location.name,
+       label:String(number),
+       time:location.time
+       });
+       var div=document.createElement('div');
+       var div2=document.createElement('div');
+      var h1=document.createElement('h1');
+      var button=document.createElement('button');
+      var button2=document.createElement('button');
+      var labeldate=document.createElement('label');
+      var labeltime=document.createElement('label');
+      var labeltext=document.createElement('label');
+      
+      var date=document.createElement('input');
+      var time=document.createElement('input');
+      var text=document.createElement('textarea');
+      var form=document.createElement('form');
+      labeldate.htmlFor="i_date";
+      labeltext.htmlFor="i_text";
+      labeltime.htmlFor="i_time";
+      button.setAttribute("class","updatebtn");
+      button.setAttribute("type","submit");
+      button.setAttribute("onclick","return check();")
+      button.setAttribute("id","updatebtn");
+      button.setAttribute("formaction","/update/"+location.date+","+location.time);
+      button2.setAttribute("class","deletebtn");
+      button2.setAttribute("type","submit");
+      button2.setAttribute("onclick","return check();")
+      button2.setAttribute("id","deletebtn");
+      button2.setAttribute("formaction","/delete/"+location.date+","+location.time);
+    
+      
+      form.setAttribute("method","post");
+      div2.setAttribute("class","clearfix");
+      form.setAttribute("name","frm");
+      time.setAttribute("type","time");
+      time.setAttribute("name","time");
+      time.setAttribute("id","i_time");
+      date.setAttribute("name","date");
+      date.setAttribute("type","date");
+      date.setAttribute("id","i_date");
+      date.setAttribute("value",location.date);
+      time.setAttribute("value",location.time);
+      text.setAttribute("placeholder","내용을 입력해 주세요. 최대 2000글자 입니다.");
+      text.setAttribute("id","i_text");
+      text.setAttribute("maxlength","2000");
+      text.setAttribute("rows","15");
+      text.setAttribute("name","text");
+      text.textContent=location.text;
+     
+      h1.textContent=location.name;
+      button.classList.add('btn');
+      labeldate.textContent='날짜';
+      labeltime.textContent='시간';
+      labeltext.textContent='내용';
+      button.textContent='수정';
+      button2.textContent='삭제';
+      div.appendChild(h1);
+      div.appendChild(form);
+      div2.appendChild(button);
+      div2.appendChild(button2);
+      form.appendChild(labeldate);
+      form.appendChild(date);
+      form.appendChild(labeltime);
+      form.appendChild(time);
+      form.appendChild(labeltext);
+      form.appendChild(text);
+      form.appendChild(div2);
+      
+      var infoWin=new google.maps.InfoWindow({
+        content:div
+      })
+      marker.addListener('click',function(){
+        infoWin.open(map,marker);
+      });
+     markers.push(marker);
+    }
+
+
+    function setMapOnAll(map) {
+      for (let i = 0; i < markers.length; i++) {
+         markers[i].setMap(map);
+      }
+    }
+
+      function clearMarkers() {
+        setMapOnAll(null);
+      }
+
+      function showMarkers() {
+         setMapOnAll(map);
+      }
+
+      function deleteMarkers() {
+        clearMarkers();
+        markers = [];
+      }
+  </script>
+
+  </body>
+</html>
