@@ -46,7 +46,7 @@
 ### 3-2. git clone
 git clone 해주세요
 ```
-git clone http://khuhub.khu.ac.kr/2017103987/term-project.git
+git clone https://github.com/kyungcom/MapDairy.git
 ```
 ### 3-3. npm install
 ```
